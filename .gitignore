@@ -1,0 +1,116 @@
+# =============================================================================
+# Python
+# =============================================================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+eggs/
+parts/
+var/
+sdist/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.pyd
+*.manifest
+
+# Virtual environments
+.env/
+.venv/
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# mypy / pyright / ruff
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyright/
+.ruff_cache/
+
+# pytest
+.pytest_cache/
+.cache/
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+*.cover
+
+# =============================================================================
+# FastAPI / Uvicorn
+# =============================================================================
+*.log
+uvicorn.log
+
+# =============================================================================
+# Environment & Secrets  ← NEVER commit these
+# =============================================================================
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+firebase_credentials.json
+service_account.json
+
+# =============================================================================
+# Uploads / Temporary files
+# =============================================================================
+tmp/
+uploads/
+/backend/uploads/
+/backend/tmp/
+
+# =============================================================================
+# React / Vite (frontend)
+# =============================================================================
+node_modules/
+dist/
+.vite/
+*.local
+
+# Yarn / npm
+yarn-error.log
+yarn-debug.log*
+npm-debug.log*
+package-lock.json
+.pnp
+.pnp.js
+
+# =============================================================================
+# OS files
+# =============================================================================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+
+# =============================================================================
+# IDEs & Editors
+# =============================================================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*.sublime-project
+*.sublime-workspace
