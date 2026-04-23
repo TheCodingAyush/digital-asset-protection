@@ -14,6 +14,7 @@ from pydantic import BaseModel
 
 from services.phash_service import batch_compare_phash
 from services.clip_service import batch_compare_clip
+from services.firebase_service import get_db
 
 router = APIRouter()
 
@@ -137,6 +138,116 @@ async def compare_content(request: CompareRequest):
                 }
 
     # Sort by similarity descending
+    sorted_matches = sorted(
+        best_matches.values(),
+        key=lambda m: m["similarity"],
+        reverse=True,
+    )
+
+    match_results = [MatchResult(**m) for m in sorted_matches]
+    scan_time = round(time.perf_counter() - start_time, 4)
+
+    return DetectionReport(
+        matches=match_results,
+        total_matches=len(match_results),
+        scan_time_seconds=scan_time,
+    )
+
+
+# ── Auto-compare (Firestore dataset) ─────────────────────────────────────────
+
+class AutoCompareRequest(BaseModel):
+    """Payload for /compare/auto — only query_frames needed; dataset is fetched from Firestore."""
+    query_frames: list[QueryFrame]
+
+
+@router.post("/auto", response_model=DetectionReport)
+async def compare_auto(request: AutoCompareRequest):
+    """
+    Compare uploaded query frames against the full dataset stored in Firestore.
+
+    The dataset is fetched from the `dataset` Firestore collection at request
+    time. The same two-stage pHash + CLIP pipeline used by POST /compare/ is
+    then applied automatically.
+
+    **Stage 1 — pHash pre-filter:** Hamming distance < 15
+    **Stage 2 — CLIP verification:** Cosine similarity > 0.85
+
+    Returns:
+        A DetectionReport identical in shape to POST /compare/.
+    """
+    from fastapi import HTTPException as _HTTPException
+
+    start_time = time.perf_counter()
+
+    if not request.query_frames:
+        raise _HTTPException(status_code=400, detail="query_frames must not be empty.")
+
+    # ── Fetch dataset from Firestore ──────────────────────────────────────────
+    try:
+        db = get_db()
+        docs = db.collection("dataset").stream()
+        raw_items = [doc.to_dict() for doc in docs]
+    except Exception as e:
+        raise _HTTPException(
+            status_code=500,
+            detail=f"Failed to fetch dataset from Firestore: {e}",
+        )
+
+    if not raw_items:
+        raise _HTTPException(
+            status_code=400,
+            detail="Firestore dataset collection is empty. Add items via POST /dataset/add first.",
+        )
+
+    # Deserialise into DatasetItem objects for type safety
+    try:
+        dataset = [DatasetItem(**item) for item in raw_items]
+    except Exception as e:
+        raise _HTTPException(
+            status_code=500,
+            detail=f"Firestore dataset contains malformed documents: {e}",
+        )
+
+    # ── Reuse the same two-stage pipeline ────────────────────────────────────
+    dataset_phashes: list[str] = [item.phash for item in dataset]
+    dataset_embeddings: list[list[float]] = [item.embedding for item in dataset]
+    best_matches: dict[str, dict] = {}
+
+    for query_frame in request.query_frames:
+        phash_candidates = batch_compare_phash(query_frame.phash, dataset_phashes)
+
+        if not phash_candidates:
+            continue
+
+        candidate_indices: list[int] = [c["index"] for c in phash_candidates]
+        candidate_embeddings: list[list[float]] = [
+            dataset_embeddings[i] for i in candidate_indices
+        ]
+        phash_distance_by_original_idx: dict[int, int] = {
+            c["index"]: c["distance"] for c in phash_candidates
+        }
+
+        clip_matches = batch_compare_clip(query_frame.embedding, candidate_embeddings)
+
+        for clip_match in clip_matches:
+            original_idx = candidate_indices[clip_match["index"]]
+            dataset_item = dataset[original_idx]
+
+            phash_dist = phash_distance_by_original_idx[original_idx]
+            similarity = clip_match["similarity"]
+
+            existing = best_matches.get(dataset_item.id)
+            if existing is None or similarity > existing["similarity"]:
+                best_matches[dataset_item.id] = {
+                    "id": dataset_item.id,
+                    "title": dataset_item.title,
+                    "url": dataset_item.url,
+                    "source": dataset_item.source,
+                    "similarity": similarity,
+                    "phash_distance": phash_dist,
+                }
+
     sorted_matches = sorted(
         best_matches.values(),
         key=lambda m: m["similarity"],
