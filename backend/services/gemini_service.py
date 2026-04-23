@@ -1,6 +1,9 @@
 import os
 import json
 import google.generativeai as genai
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Load API key from environment variable and configure the client
 _api_key = os.getenv("GEMINI_API_KEY")
@@ -8,7 +11,7 @@ if _api_key:
     genai.configure(api_key=_api_key)
 
 # Use the gemini-1.5-flash model
-_model = genai.GenerativeModel("gemini-1.5-flash")
+_model = genai.GenerativeModel("gemini-2.0-flash")
 
 
 def analyze_match(
@@ -73,5 +76,6 @@ def analyze_match(
             "recommendation": str(result.get("recommendation", "Manual review required")),
         }
 
-    except Exception:
+    except Exception as e:
+        pass
         return _fallback

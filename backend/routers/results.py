@@ -2,7 +2,7 @@ from fastapi import APIRouter
 from pydantic import BaseModel
 from typing import Any, Dict, List
 
-from backend.services.gemini_service import analyze_match
+from services.gemini_service import analyze_match
 
 router = APIRouter()
 

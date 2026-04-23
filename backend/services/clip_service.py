@@ -73,7 +73,7 @@ def generate_embedding(image: Image.Image) -> list[float]:
         outputs = model.get_image_features(**inputs)
 
     # Convert to numpy and L2-normalise
-    embedding = outputs.squeeze(0).cpu().numpy()
+    embedding = outputs.pooler_output.squeeze().tolist()
     norm = np.linalg.norm(embedding)
     if norm > 0:
         embedding = embedding / norm
