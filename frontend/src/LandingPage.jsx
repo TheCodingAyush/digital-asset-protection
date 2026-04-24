@@ -1,17 +1,25 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Upload, Search, ShieldAlert, Fingerprint, Eye, Sparkles } from 'lucide-react';
 import { FaXTwitter, FaGithub, FaLinkedinIn } from 'react-icons/fa6';
 import './landing.css';
 
 const LandingPage = () => {
+  const navigate = useNavigate();
+
+  const handleLoginClick = (e) => {
+    e.preventDefault();
+    navigate('/login');
+  };
+
   return (
     <>
       <nav className="navbar">
         <div className="container">
           <a href="/" className="navbar-logo">FrameLens</a>
           <div className="navbar-links">
-            <a href="#login" className="nav-link">Login</a>
-            <a href="#get-started" className="nav-link">Get Started</a>
+            <a href="/login" onClick={handleLoginClick} className="nav-link">Login</a>
+            <a href="/login" onClick={handleLoginClick} className="nav-link">Get Started</a>
           </div>
         </div>
       </nav>
@@ -32,7 +40,7 @@ const LandingPage = () => {
               FrameLens automatically finds stolen, cropped, or reposted versions of your videos and images across the web — before you even know they exist.
             </p>
             <div className="hero-actions">
-              <a href="#get-started" className="btn btn-text-primary">Get Started</a>
+              <a href="/login" onClick={handleLoginClick} className="btn btn-text-primary">Get Started</a>
               <a href="#how-it-works" className="btn btn-outline">See How It Works</a>
             </div>
           </div>
@@ -115,7 +123,7 @@ const LandingPage = () => {
           <div className="container">
             <h2 className="cta-title">Your content is being stolen right now.</h2>
             <p className="cta-subtitle">Start detecting it in minutes.</p>
-            <a href="#get-started" className="btn-cta">Get Started</a>
+            <a href="/login" onClick={handleLoginClick} className="btn-cta">Get Started</a>
           </div>
         </section>
       </main>
@@ -133,7 +141,7 @@ const LandingPage = () => {
                 <h4 className="footer-col-title">PRODUCT</h4>
                 <a href="#features" className="footer-link">Features</a>
                 <a href="#how-it-works" className="footer-link">How It Works</a>
-                <a href="#get-started" className="footer-link">Get Started</a>
+                <a href="/login" onClick={handleLoginClick} className="footer-link">Get Started</a>
               </div>
               <div className="footer-col">
                 <h4 className="footer-col-title">COMPANY</h4>
