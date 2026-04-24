@@ -1,35 +1,40 @@
 # FrameLens
+AI-powered digital asset protection system that detects copyright infringement in videos and images across multiple sources.
 
-AI-powered digital asset protection system that detects copyright infringement in videos and images.
+## Current Status
+- ✅ Backend API complete (9 endpoints)
+- ✅ Firebase Firestore integration
+- ✅ CLIP + pHash two-stage detection
+- ✅ Gemini AI risk analysis
+- ✅ Landing page
+- ✅ Login/Signup (Firebase Auth)
+- ✅ Upload page with scanning animation
+- ✅ Results page with match cards
+- 🔄 YouTube API integration (in progress)
+- 🔄 Google Search API integration (in progress)
+- 🔄 Dataset Manager page (in progress)
+- 🔄 Propagation graph (in progress)
 
 ## Tech Stack
-- **Backend:** Python 3, FastAPI, CLIP (ViT-B/32), pHash, Gemini AI, Firebase Firestore
-- **Frontend:** React 19, Vite, Vanilla CSS
+- Backend: Python 3, FastAPI, CLIP ViT-B/32, pHash, Gemini AI, Firebase Firestore
+- Frontend: React 19, Vite, Vanilla CSS, React Router
+- AI: OpenAI CLIP, Google Gemini 2.0 Flash, perceptual hashing
+- Database: Firebase Firestore
 
-## Features
-- **Two-stage detection pipeline:** perceptual hash filtering + CLIP deep embeddings
-- **Gemini AI risk analysis:** (modification type, risk level, recommendation)
-- **Firebase Firestore:** dataset management
-- **Full REST API:** with 9 endpoints
-
-## Project Structure
-```text
-.
-├── backend/                  # FastAPI python backend
-│   ├── routers/              # API endpoint routes
-│   ├── services/             # Core AI, hashing, and Firebase logic
-│   ├── main.py               # Application entry point
-│   └── requirements.txt      # Python dependencies
-├── frontend/                 # React 19 + Vite frontend
-│   ├── src/                  
-│   │   ├── App.jsx           
-│   │   ├── LandingPage.jsx   # Brutalist landing page
-│   │   ├── landing.css       # Core styling & design system
-│   │   └── main.jsx          
-│   ├── package.json          
-│   └── vite.config.js        
-├── .env.example              # Environment template
-└── README.md
+## System Flow
+```
+Upload video/image
+      ↓
+Extract frames + generate CLIP embeddings + pHash
+      ↓
+Compare against:
+  ├── Local Firestore dataset
+  ├── YouTube (thumbnails) [coming soon]
+  └── Google Web Search [coming soon]
+      ↓
+Gemini AI risk analysis
+      ↓
+Results dashboard
 ```
 
 ## Getting Started
@@ -40,7 +45,7 @@ cd backend
 pip install -r requirements.txt
 uvicorn main:app --reload
 ```
-API docs available at `http://localhost:8000/docs`
+API docs: http://localhost:8000/docs
 
 ### Frontend
 ```bash
@@ -48,14 +53,14 @@ cd frontend
 npm install
 npm run dev
 ```
-App available at `http://localhost:5173`
+App: http://localhost:5173
 
 ## Environment Variables
-Copy `.env.example` to `.env` and fill in:
-- `GEMINI_API_KEY` — Google Gemini API key
-- `FIREBASE_CREDENTIALS` — path to Firebase service account JSON
+- `GEMINI_API_KEY=your_gemini_key`
+- `FIREBASE_CREDENTIALS=firebase-credentials.json`
 
-## Status
-- ✅ Backend complete
-- ✅ Landing page complete
-- 🔄 Auth, Upload, Results pages — in progress
+## Architecture
+- Two-stage detection: pHash Hamming distance filter → CLIP cosine similarity verification
+- Threshold: pHash distance < 15, CLIP similarity > 0.85
+- Frame extraction: every 5 seconds for videos
+- Dataset stored in Firebase Firestore
