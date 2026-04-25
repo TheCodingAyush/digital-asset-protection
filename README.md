@@ -10,10 +10,10 @@ AI-powered digital asset protection system that detects copyright infringement i
 - ✅ Login/Signup (Firebase Auth)
 - ✅ Upload page with scanning animation
 - ✅ Results page with match cards
-- 🔄 YouTube API integration (in progress)
-- 🔄 Google Search API integration (in progress)
-- 🔄 Dataset Manager page (in progress)
+- ✅ YouTube API integration (in progress)
+- ✅ Dataset Manager page (in progress)
 - 🔄 Propagation graph (in progress)
+- 🔄 Google Gemini Analysis(in progress)
 
 ## Tech Stack
 - Backend: Python 3, FastAPI, CLIP ViT-B/32, pHash, Gemini AI, Firebase Firestore

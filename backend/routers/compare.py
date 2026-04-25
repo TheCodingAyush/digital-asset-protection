@@ -15,6 +15,8 @@ from pydantic import BaseModel
 from services.phash_service import batch_compare_phash
 from services.clip_service import batch_compare_clip
 from services.firebase_service import get_db
+from services.youtube_service import compare_youtube
+import asyncio
 
 router = APIRouter()
 
@@ -58,6 +60,12 @@ class DetectionReport(BaseModel):
     matches: list[MatchResult]
     total_matches: int
     scan_time_seconds: float
+
+
+class UnifiedCompareRequest(BaseModel):
+    """Payload for the /compare/unified endpoint."""
+    query: str
+    query_frames: list[QueryFrame]
 
 
 # ── Route ────────────────────────────────────────────────────────────────────
@@ -254,6 +262,109 @@ async def compare_auto(request: AutoCompareRequest):
         reverse=True,
     )
 
+    match_results = [MatchResult(**m) for m in sorted_matches]
+    scan_time = round(time.perf_counter() - start_time, 4)
+
+    return DetectionReport(
+        matches=match_results,
+        total_matches=len(match_results),
+        scan_time_seconds=scan_time,
+    )
+
+
+@router.post("/unified", response_model=DetectionReport)
+async def compare_unified(request: UnifiedCompareRequest):
+    """
+    Unified comparison endpoint that runs both Firestore dataset matching
+    and YouTube search matching in parallel.
+
+    Results are combined, deduplicated by ID (keeping best similarity),
+    and sorted by similarity descending.
+    """
+    start_time = time.perf_counter()
+
+    if not request.query_frames:
+        raise HTTPException(status_code=400, detail="query_frames must not be empty.")
+
+    async def run_dataset_compare():
+        # ── Fetch dataset from Firestore ──────────────────────────────────────
+        try:
+            db = get_db()
+            docs = db.collection("dataset").stream()
+            raw_items = [doc.to_dict() for doc in docs]
+        except Exception as e:
+            print(f"[unified] Firestore error: {e}")
+            return []
+
+        if not raw_items:
+            return []
+
+        dataset = [DatasetItem(**item) for item in raw_items]
+        dataset_phashes: list[str] = [item.phash for item in dataset]
+        dataset_embeddings: list[list[float]] = [item.embedding for item in dataset]
+        
+        matches = {}
+        for query_frame in request.query_frames:
+            phash_candidates = batch_compare_phash(query_frame.phash, dataset_phashes)
+            if not phash_candidates: continue
+
+            candidate_indices = [c["index"] for c in phash_candidates]
+            candidate_embeddings = [dataset_embeddings[i] for i in candidate_indices]
+            phash_dist_map = {c["index"]: c["distance"] for c in phash_candidates}
+
+            clip_matches = batch_compare_clip(query_frame.embedding, candidate_embeddings)
+            for clip_match in clip_matches:
+                idx = candidate_indices[clip_match["index"]]
+                item = dataset[idx]
+                sim = clip_match["similarity"]
+                
+                if item.id not in matches or sim > matches[item.id]["similarity"]:
+                    matches[item.id] = {
+                        "id": item.id,
+                        "title": item.title,
+                        "url": item.url,
+                        "source": "Dataset",  # Tag as Dataset
+                        "similarity": sim,
+                        "phash_distance": phash_dist_map[idx],
+                    }
+        return list(matches.values())
+
+    async def run_youtube_compare():
+        # YouTube comparison (run in thread because it's sync and heavy)
+        best_matches = {}
+        for frame in request.query_frames:
+            # We use a thread to avoid blocking the event loop
+            yt_matches = await asyncio.to_thread(
+                compare_youtube,
+                query=request.query,
+                query_embedding=frame.embedding,
+                query_phash=frame.phash
+            )
+            for m in yt_matches:
+                if m["id"] not in best_matches or m["similarity"] > best_matches[m["id"]]["similarity"]:
+                    best_matches[m["id"]] = m
+        return list(best_matches.values())
+
+    # Run both in parallel
+    dataset_results, youtube_results = await asyncio.gather(
+        run_dataset_compare(),
+        run_youtube_compare()
+    )
+
+    # Combine and deduplicate
+    combined: dict[str, dict] = {}
+    for res in dataset_results + youtube_results:
+        item_id = res["id"]
+        if item_id not in combined or res["similarity"] > combined[item_id]["similarity"]:
+            combined[item_id] = res
+
+    # Sort and format
+    sorted_matches = sorted(
+        combined.values(),
+        key=lambda x: x["similarity"],
+        reverse=True
+    )
+    
     match_results = [MatchResult(**m) for m in sorted_matches]
     scan_time = round(time.perf_counter() - start_time, 4)
 

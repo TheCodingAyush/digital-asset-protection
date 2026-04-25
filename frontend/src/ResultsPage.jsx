@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { auth } from './firebase';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import './upload.css';
@@ -58,6 +58,8 @@ const ResultsPage = () => {
 
   const handleGeminiAnalysis = async () => {
     setIsAnalyzing(true);
+    const originalTitle = localStorage.getItem('framelens_filename') || "Scanned Content";
+    
     try {
       const res = await fetch('http://localhost:8000/results/analyze', {
         method: 'POST',
@@ -65,8 +67,8 @@ const ResultsPage = () => {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          original_title: "Scanned Content",
-          matches: matches
+          original_title: originalTitle,
+          matches: matches // includes source, id, similarity, etc.
         })
       });
       
@@ -87,6 +89,7 @@ const ResultsPage = () => {
 
   const handleScanAnother = () => {
     localStorage.removeItem('framelens_results');
+    localStorage.removeItem('framelens_filename');
     navigate('/dashboard');
   };
 
@@ -99,6 +102,12 @@ const ResultsPage = () => {
     return 'risk-unknown';
   };
 
+  const getConfidenceInfo = (similarity) => {
+    if (similarity >= 0.85) return { label: 'HIGH CONFIDENCE', class: 'conf-high' };
+    if (similarity >= 0.5) return { label: 'POSSIBLE MATCH', class: 'conf-possible' };
+    return { label: 'LOW SIMILARITY', class: 'conf-low' };
+  };
+
   if (!user || matches.length === 0) return null;
 
   return (
@@ -106,6 +115,12 @@ const ResultsPage = () => {
       <nav className="dashboard-navbar">
         <div className="container dashboard-nav-container">
           <div className="navbar-logo">FrameLens</div>
+          
+          <div className="nav-links">
+            <Link to="/dashboard" className="nav-link">SCAN</Link>
+            <Link to="/dataset" className="nav-link">PROTECT</Link>
+          </div>
+
           <div className="dashboard-nav-right">
             <div className="user-avatar" title={user.email}>
               {user.email ? user.email.charAt(0).toUpperCase() : '?'}
@@ -120,8 +135,17 @@ const ResultsPage = () => {
           <div className="results-header-container">
             <div className="results-header-left">
               <span className="section-label" style={{ marginBottom: '1.5rem' }}>SCAN RESULTS</span>
-              <h1 className="results-heading">Infringement Detected.</h1>
-              <p className="results-subtext">We found {matches.length} match(es) against your protected dataset.</p>
+              <h1 className="results-heading">
+                {matches.some(m => m.source === 'Dataset') && matches.some(m => m.source === 'YouTube')
+                  ? "Multi-Source Infringement Detected."
+                  : matches.some(m => m.source === 'YouTube')
+                    ? "Content Found Across Platforms."
+                    : "Infringement Detected."}
+              </h1>
+              <p className="results-subtext">We found {matches.length} match(es) in total.</p>
+              <p className="results-summary" style={{ color: '#666', fontSize: '0.9rem', marginTop: '0.5rem' }}>
+                {matches.filter(m => m.source === 'Dataset').length} match(es) from protected dataset · {matches.filter(m => m.source === 'YouTube').length} match(es) from YouTube
+              </p>
             </div>
             <div className="results-header-right">
               <button className="btn-outline-clean" onClick={handleScanAnother}>SCAN ANOTHER</button>
@@ -132,12 +156,30 @@ const ResultsPage = () => {
             {matches.map((match, idx) => (
               <div key={idx} className="match-card">
                 <div className="match-top-row">
-                  <h3 className="match-title">{match.title || match.id}</h3>
-                  <span className="match-similarity">{(match.similarity * 100).toFixed(2)}%</span>
+                  {match.source === 'YouTube' ? (
+                    <a href={match.url} target="_blank" rel="noopener noreferrer" className="match-title-link">
+                      <h3 className="match-title">{match.title || match.id}</h3>
+                    </a>
+                  ) : (
+                    <h3 className="match-title">{match.title || match.id}</h3>
+                  )}
+                  <div className="match-header-right">
+                    <span className="match-similarity">{(match.similarity * 100).toFixed(2)}%</span>
+                    <span className={`confidence-label ${getConfidenceInfo(match.similarity).class}`}>
+                      {getConfidenceInfo(match.similarity).label}
+                    </span>
+                    <span className={`source-badge ${match.source === 'YouTube' ? 'badge-youtube' : 'badge-dataset'}`}>
+                      {match.source}
+                    </span>
+                  </div>
                 </div>
                 <div className="match-source-row">
                   <span className="match-source">{match.source}</span>
-                  {match.url && <a href={match.url} target="_blank" rel="noopener noreferrer" className="match-url">{match.url}</a>}
+                  {match.url && (
+                    <a href={match.url} target="_blank" rel="noopener noreferrer" className="match-url">
+                      {match.url.length > 50 ? match.url.substring(0, 50) + "..." : match.url}
+                    </a>
+                  )}
                 </div>
                 <div className="match-divider"></div>
                 <div className="match-bottom-section">
@@ -170,7 +212,11 @@ const ResultsPage = () => {
 
           <div className="bottom-actions">
             <button className="btn-scan-filled" onClick={handleScanAnother}>SCAN ANOTHER FILE</button>
-            <button className="btn-home" onClick={() => { localStorage.removeItem('framelens_results'); navigate('/'); }}>GO HOME</button>
+            <button className="btn-home" onClick={() => { 
+              localStorage.removeItem('framelens_results'); 
+              localStorage.removeItem('framelens_filename');
+              navigate('/'); 
+            }}>GO HOME</button>
           </div>
         </div>
       </main>

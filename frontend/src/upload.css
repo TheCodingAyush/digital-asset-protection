@@ -377,3 +377,34 @@
 .btn-cancel-scan:hover {
   color: #FF3D00;
 }
+
+/* Navbar Links */
+.nav-links {
+  display: flex;
+  gap: 2rem;
+  margin-left: 3rem;
+  margin-right: auto;
+}
+
+.nav-link {
+  color: #888888;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 0.875rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 0.5rem 0;
+  border-bottom: 2px solid transparent;
+  transition: all 150ms ease;
+}
+
+.nav-link:hover {
+  color: #FAFAFA;
+  border-bottom: 2px solid #FAFAFA;
+}
+
+.nav-link.active,
+.nav-link.active:hover {
+  color: #FAFAFA;
+  border-bottom: 2px solid #FF3D00;
+}

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Upload, CheckCircle2 } from 'lucide-react';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { auth } from './firebase';
@@ -127,12 +127,17 @@ const UploadPage = () => {
       }
 
       // Compare frames
-      const compareRes = await fetch('http://localhost:8000/compare/auto', {
+      const query = file.name.replace(/\.[^/.]+$/, ''); // removes extension
+      localStorage.setItem('framelens_filename', query);
+      const compareRes = await fetch('http://localhost:8000/compare/unified', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ query_frames: uploadData.frames }),
+        body: JSON.stringify({ 
+          query: query,
+          query_frames: uploadData.frames 
+        }),
         signal: abortController.signal
       });
       
@@ -182,6 +187,12 @@ const UploadPage = () => {
       <nav className="dashboard-navbar">
         <div className="container dashboard-nav-container">
           <div className="navbar-logo">FrameLens</div>
+          
+          <div className="nav-links">
+            <Link to="/dashboard" className="nav-link active">SCAN</Link>
+            <Link to="/dataset" className="nav-link">PROTECT</Link>
+          </div>
+
           <div className="dashboard-nav-right">
             <div className="user-avatar" title={user.email}>
               {user.email ? user.email.charAt(0).toUpperCase() : '?'}

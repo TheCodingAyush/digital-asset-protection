@@ -4,6 +4,7 @@ import LandingPage from './LandingPage';
 import LoginPage from './LoginPage';
 import UploadPage from './UploadPage';
 import ResultsPage from './ResultsPage';
+import DatasetPage from './DatasetPage';
 import './landing.css';
 
 function App() {
@@ -14,6 +15,7 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/dashboard" element={<UploadPage />} />
         <Route path="/results" element={<ResultsPage />} />
+        <Route path="/dataset" element={<DatasetPage />} />
       </Routes>
     </BrowserRouter>
   );
