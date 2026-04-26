@@ -42,21 +42,26 @@ def analyze_match(
         "recommendation": "Manual review required",
     }
 
+    print(f"[gemini] Analyzing: {original_title} vs {matched_title}, similarity: {similarity}, source: {source}")
+
     if not _api_key:
         return _fallback
 
     prompt = (
-        f"Given an original media asset '{original_title}' was found matching "
-        f"'{matched_title}' from {source} with {similarity:.0%} similarity, analyze:\n"
-        "1. Likely modification type (cropped/trimmed/filtered/reposted/unknown)\n"
-        "2. Infringement risk level (high/medium/low)\n"
-        "3. One line recommendation\n"
-        "Respond in JSON only:\n"
-        '{"modification_type": "...", "risk_level": "...", "recommendation": "..."}'
+        f"A sports media asset titled '{original_title}' was found matching "
+        f"'{matched_title}' from {source} with {similarity:.0%} visual similarity.\n"
+        f"Based on this information:\n"
+        f"1. What is the likely modification type? Choose from: cropped, trimmed, filtered, reposted, screenshot, unknown\n"
+        f"2. What is the infringement risk level? Choose from: high, medium, low\n"
+        f"3. Give a one-line recommended action for the rights holder.\n"
+        f"Note: {similarity:.0%} similarity on a sports image found on {source} strongly suggests unauthorized reuse.\n"
+        f"Respond in JSON only:\n"
+        '{{"modification_type": "...", "risk_level": "...", "recommendation": "..."}}'
     )
 
     try:
         response = _model.generate_content(prompt)
+        print(f"[gemini] Raw response: {response.text}")
         raw_text = response.text.strip()
 
         # Strip optional markdown code fences if the model wraps the JSON
@@ -77,5 +82,5 @@ def analyze_match(
         }
 
     except Exception as e:
-        pass
+        print(f"[gemini] Error: {e}")
         return _fallback

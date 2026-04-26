@@ -285,7 +285,7 @@ const DatasetPage = () => {
                     {asset.url}
                   </a>
                   <div className="asset-card-bottom">
-                    <span className="asset-date">ID: {asset.id}</span>
+                    <span />
                     <button className="btn-delete-asset" onClick={() => handleDelete(asset.id)}>
                       <Trash2 size={14} style={{ marginRight: '4px' }} /> DELETE
                     </button>
