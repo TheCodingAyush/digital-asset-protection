@@ -2,7 +2,7 @@
 
 > AI-powered digital asset protection for sports organizations — detects unauthorized usage of official media across platforms using a two-stage CLIP + pHash detection pipeline, Gemini AI risk analysis, and real-time YouTube cross-referencing.
 
-[![Live Demo](https://img.shields.io/badge/Live%20Demo-Vercel-black?style=for-the-badge&logo=vercel)](https://your-vercel-url.vercel.app)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Vercel-black?style=for-the-badge&logo=vercel)](https://digital-asset-protection-pi.vercel.app/)
 [![Backend](https://img.shields.io/badge/Backend-Hugging%20Face%20Spaces-yellow?style=for-the-badge&logo=huggingface)](https://huggingface.co/spaces/Ayushcodes123/framelens-backend)
 [![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)](LICENSE)
 
@@ -18,7 +18,7 @@ FrameLens enables sports organizations to register their original media assets a
 
 | Service | Platform | URL |
 |---|---|---|
-| Frontend | Vercel | `https://your-vercel-url.vercel.app` |
+| Frontend | Vercel | `https://digital-asset-protection-pi.vercel.app/` |
 | Backend API | Hugging Face Spaces (Docker) | `https://Ayushcodes123-framelens-backend.hf.space` |
 | API Docs | FastAPI Swagger UI | `https://Ayushcodes123-framelens-backend.hf.space/docs` |
 
