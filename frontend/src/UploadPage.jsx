@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
+
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 import { useNavigate, Link } from 'react-router-dom';
 import { Upload, CheckCircle2 } from 'lucide-react';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
@@ -107,7 +109,7 @@ const UploadPage = () => {
 
       // Determine endpoint based on file type
       const isVideo = file.type.startsWith('video/');
-      const uploadUrl = isVideo ? 'http://localhost:8000/upload/video' : 'http://localhost:8000/upload/image';
+      const uploadUrl = isVideo ? `${API_BASE}/upload/video` : `${API_BASE}/upload/image`;
       
       const formData = new FormData();
       formData.append('file', file);
@@ -129,7 +131,7 @@ const UploadPage = () => {
       // Compare frames
       const query = file.name.replace(/\.[^/.]+$/, ''); // removes extension
       localStorage.setItem('framelens_filename', query);
-      const compareRes = await fetch('http://localhost:8000/compare/unified', {
+      const compareRes = await fetch(`${API_BASE}/compare/unified`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

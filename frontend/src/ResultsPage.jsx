@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 import { useNavigate, Link } from 'react-router-dom';
 import { auth } from './firebase';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
@@ -62,7 +64,7 @@ const ResultsPage = () => {
     const originalTitle = localStorage.getItem('framelens_filename') || "Scanned Content";
     
     try {
-      const res = await fetch('http://localhost:8000/results/analyze', {
+      const res = await fetch(`${API_BASE}/results/analyze`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
+
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 import { useNavigate, Link } from 'react-router-dom';
 import { Shield, Upload, X, Trash2 } from 'lucide-react';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
@@ -38,7 +40,7 @@ const DatasetPage = () => {
 
   const fetchAssets = async () => {
     try {
-      const res = await fetch('http://localhost:8000/dataset/');
+      const res = await fetch(`${API_BASE}/dataset/`);
       if (res.ok) {
         const data = await res.json();
         setAssets(Array.isArray(data) ? data : data.items || data.dataset || []);
@@ -62,7 +64,7 @@ const DatasetPage = () => {
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to remove this asset from protection?")) return;
     try {
-      const res = await fetch(`http://localhost:8000/dataset/${id}`, {
+      const res = await fetch(`${API_BASE}/dataset/${id}`, {
         method: 'DELETE'
       });
       if (res.ok) {
@@ -98,7 +100,7 @@ const DatasetPage = () => {
     try {
       // 1. Upload to get embeddings
       const isVideo = selectedFile.type.startsWith('video/');
-      const uploadUrl = isVideo ? 'http://localhost:8000/upload/video' : 'http://localhost:8000/upload/image';
+      const uploadUrl = isVideo ? `${API_BASE}/upload/video` : `${API_BASE}/upload/image`;
       
       const uploadFormData = new FormData();
       uploadFormData.append('file', selectedFile);
@@ -127,7 +129,7 @@ const DatasetPage = () => {
         embedding: frame.embedding
       };
 
-      const addRes = await fetch('http://localhost:8000/dataset/add', {
+      const addRes = await fetch(`${API_BASE}/dataset/add`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(assetPayload)

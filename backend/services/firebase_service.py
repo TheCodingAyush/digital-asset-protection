@@ -14,6 +14,7 @@ Usage
 """
 
 import os
+import json
 import firebase_admin
 from firebase_admin import credentials, firestore
 from dotenv import load_dotenv
@@ -29,30 +30,41 @@ def _init_firebase() -> None:
     that subsequent imports never trigger a second initialisation (singleton
     pattern).
 
+    Supports two modes via the FIREBASE_CREDENTIALS environment variable:
+      1. File path  — value is a path to a JSON file (local dev)
+      2. JSON string — value is the raw JSON content (HF Spaces / production)
+
     Raises:
         ValueError: If FIREBASE_CREDENTIALS env variable is not set.
-        FileNotFoundError: If the credentials file does not exist at the
-                           specified path.
     """
     try:
         firebase_admin.get_app()
         # App already initialised — nothing to do.
     except ValueError:
         # No default app yet — initialise now.
-        cred_path = os.getenv("FIREBASE_CREDENTIALS")
+        cred_value = os.getenv("FIREBASE_CREDENTIALS")
 
-        if not cred_path:
+        if not cred_value:
             raise ValueError(
                 "FIREBASE_CREDENTIALS environment variable is not set. "
-                "Set it to the path of your Firebase service-account JSON file."
+                "Set it to the path of your Firebase service-account JSON file, "
+                "or the raw JSON string of the credentials."
             )
 
-        if not os.path.isfile(cred_path):
-            raise FileNotFoundError(
-                f"Firebase credentials file not found at: {cred_path}"
-            )
+        # Mode 1: file path (local development)
+        if os.path.isfile(cred_value):
+            cred = credentials.Certificate(cred_value)
 
-        cred = credentials.Certificate(cred_path)
+        # Mode 2: raw JSON string (HF Spaces / server deployment)
+        else:
+            try:
+                cred_dict = json.loads(cred_value)
+                cred = credentials.Certificate(cred_dict)
+            except json.JSONDecodeError as exc:
+                raise ValueError(
+                    "FIREBASE_CREDENTIALS is not a valid file path or JSON string."
+                ) from exc
+
         firebase_admin.initialize_app(cred)
 
 
