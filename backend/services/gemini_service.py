@@ -36,16 +36,24 @@ def analyze_match(
             - risk_level:        str  (high/medium/low/unknown)
             - recommendation:    str  (one-line action recommendation)
     """
-    _fallback = {
+    if similarity >= 0.6:
+        risk = "High"
+    elif similarity >= 0.4:
+        risk = "Medium"
+    else:
+        risk = "Low"
+
+    fallback_response = {
         "modification_type": "unknown",
-        "risk_level": "unknown",
-        "recommendation": "Manual review required",
+        "risk_level": risk,
+        "recommendation": "Detected using CLIP similarity matching (fallback mode)",
     }
 
     print(f"[gemini] Analyzing: {original_title} vs {matched_title}, similarity: {similarity}, source: {source}")
 
     if not _api_key:
-        return _fallback
+        print("[gemini] Fallback triggered due to error: API key missing")
+        return fallback_response
 
     prompt = (
         f"A sports media asset titled '{original_title}' was found matching "
@@ -82,5 +90,5 @@ def analyze_match(
         }
 
     except Exception as e:
-        print(f"[gemini] Error: {e}")
-        return _fallback
+        print(f"[gemini] Fallback triggered due to error: {str(e)}")
+        return fallback_response

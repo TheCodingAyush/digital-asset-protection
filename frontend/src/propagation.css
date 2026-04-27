@@ -1,0 +1,112 @@
+/* propagation.css */
+
+.pg-section {
+  margin-bottom: 4rem;
+}
+
+.pg-section-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #FF3D00;
+  margin-bottom: 0.75rem;
+  display: block;
+}
+
+.pg-section-heading {
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: #FAFAFA;
+  margin: 0 0 0.5rem 0;
+}
+
+.pg-section-subtext {
+  font-size: 0.9rem;
+  color: #666;
+  margin: 0 0 2rem 0;
+}
+
+.pg-wrapper {
+  width: 100%;
+  height: 400px;
+  background: #0A0A0A;
+  border: 1px solid #262626;
+}
+
+/* Node content */
+.pg-node-content {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  text-align: center;
+}
+
+.pg-node-title {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #FAFAFA;
+  word-break: break-word;
+  line-height: 1.3;
+}
+
+.pg-node-sim {
+  font-size: 0.85rem;
+  font-weight: 900;
+  color: #FF3D00;
+}
+
+.pg-node-source {
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.pg-source-yt {
+  color: #ff0000;
+}
+
+.pg-source-ds {
+  color: #888888;
+}
+
+/* Override React Flow controls to match dark theme */
+.pg-controls .react-flow__controls {
+  background: #0F0F0F;
+  border: 1px solid #262626;
+  border-radius: 0;
+}
+
+.react-flow__controls-button {
+  background: #0F0F0F !important;
+  border: none !important;
+  border-bottom: 1px solid #262626 !important;
+  color: #888888 !important;
+  fill: #888888 !important;
+}
+
+.react-flow__controls-button:hover {
+  background: #1a1a1a !important;
+  fill: #FAFAFA !important;
+}
+
+.react-flow__controls-button:last-child {
+  border-bottom: none !important;
+}
+
+/* Override React Flow panel bg */
+.react-flow__panel {
+  margin: 12px;
+}
+
+/* Minimap (hidden) */
+.react-flow__minimap {
+  display: none;
+}
+
+/* Edge label overrides */
+.react-flow__edge-path {
+  cursor: default;
+}

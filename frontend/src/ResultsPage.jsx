@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { auth } from './firebase';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
+import PropagationGraph from './PropagationGraph';
 import './upload.css';
 import './results.css';
 
@@ -200,6 +201,14 @@ const ResultsPage = () => {
                 </div>
               </div>
             ))}
+          </div>
+
+          {/* ── Propagation Map ── */}
+          <div className="pg-section">
+            <span className="pg-section-label">PROPAGATION MAP</span>
+            <h2 className="pg-section-heading">Content spread detected.</h2>
+            <p className="pg-section-subtext">Visual map of where your content was found.</p>
+            <PropagationGraph matches={matches} />
           </div>
 
           <button 
