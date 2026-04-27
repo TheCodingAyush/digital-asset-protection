@@ -1,131 +1,100 @@
-# FrameLens
-AI-powered digital asset protection system that detects copyright infringement in videos and images across multiple sources — built for sports organizations to protect their official media.
+# FrameLens 🛡️
 
-## Project Status
-- ✅ Backend API complete (11 endpoints)
-- ✅ Firebase Firestore integration
-- ✅ CLIP + pHash two-stage detection engine
-- ✅ Gemini AI risk analysis
-- ✅ YouTube Data API v3 integration
-- ✅ Unified multi-source compare endpoint
-- ✅ Landing page (Bold Typography design system)
-- ✅ Login/Signup (Firebase Auth — Email/Password)
-- ✅ Upload page with scanning animation
-- ✅ Results page with confidence labels + source badges
-- ✅ Propagation graph (React Flow)
-- ✅ Dataset Manager (register + manage protected assets)
+**FrameLens** is an AI-powered digital asset protection system designed to detect copyright infringement in videos and images across multiple sources. Built specifically for sports organizations and media companies, it helps protect official media from unauthorized use and distribution.
 
-## Tech Stack
+## 🚀 Live Deployment
 
-### Backend
-- Python 3.12, FastAPI, Uvicorn
-- OpenCV — video frame extraction
-- CLIP ViT-B/32 (HuggingFace Transformers + PyTorch) — deep visual embeddings
-- imagehash + Pillow — perceptual hashing
-- Google Gemini 2.0 Flash — AI risk analysis
-- Firebase Admin SDK — Firestore operations
-- YouTube Data API v3 — cross-platform detection
+The system is fully deployed and accessible online:
+
+- **Frontend (Vercel):** [https://digital-asset-protection.vercel.app](https://digital-asset-protection.vercel.app) *(Note: Replace with your actual Vercel URL if different)*
+- **Backend (Hugging Face Spaces):** Hosted on HF Spaces using FastAPI and Docker.
+
+---
+
+## ✨ Key Features
+
+- **Two-Stage AI Detection Engine:** Combines **pHash** (perceptual hashing) for rapid candidate filtering and **CLIP ViT-B/32** for highly accurate deep visual semantic matching.
+- **Cross-Platform Scanning:** Simultaneously scans the local protected dataset and external platforms like YouTube in a single upload.
+- **Gemini Risk Analysis:** Automatically analyzes detected matches using Google Gemini 2.0 to determine modification types (cropped, filtered, etc.), infringement risk levels (High/Medium/Low), and recommended actions.
+- **Propagation Graph:** Visualizes how content has spread across platforms using an interactive React Flow node graph.
+- **Dataset Manager:** A dedicated dashboard for organizations to securely register and manage their protected original media.
+
+## 💻 Tech Stack
 
 ### Frontend
-- React 19, Vite
-- React Router DOM — client-side routing
-- Vanilla CSS — custom Bold Typography design system
-- Firebase JS SDK — authentication
-- React Flow (@xyflow/react) — propagation graph
-- Lucide React + React Icons — iconography
+- **Framework:** React 19, Vite
+- **Routing & State:** React Router DOM
+- **UI/UX:** Custom Vanilla CSS (Bold Typography Design System), Lucide React Icons
+- **Visualizations:** React Flow (`@xyflow/react`)
+- **Deployment:** Vercel
 
-### Database & Auth
-- Firebase Firestore — protected asset dataset
-- Firebase Authentication — Email/Password
+### Backend
+- **Framework:** Python 3.10+, FastAPI, Uvicorn
+- **AI & ML:** HuggingFace Transformers (CLIP), PyTorch, OpenCV (headless), imagehash
+- **Risk Analysis:** Google Gemini AI
+- **Database & Auth:** Firebase Firestore, Firebase Admin SDK
+- **Integrations:** YouTube Data API v3
+- **Deployment:** Docker, Hugging Face Spaces
 
-## System Flow
-Organization registers original content (Dataset Manager)
-↓
-FrameLens extracts CLIP embeddings + pHash fingerprints
-↓
-Stores in Firebase Firestore
-↓
-User uploads suspected infringing content
-↓
-Unified compare runs against:
-├── Local Firestore dataset (CLIP + pHash)
-└── YouTube API (thumbnail comparison)
-↓
-Gemini AI analyzes matches:
-├── Modification type (cropped/trimmed/filtered/reposted)
-├── Risk level (high/medium/low)
-└── Recommended action
-↓
-Results dashboard + Propagation graph
+## 🔄 System Architecture
 
-## Detection Pipeline
-- **Stage 1**: pHash Hamming distance filter (threshold < 15) — fast candidate narrowing
-- **Stage 2**: CLIP cosine similarity verification (threshold > 0.85 for dataset, > 0.3 for YouTube)
-- **Confidence Labels**: HIGH CONFIDENCE (≥85%) / POSSIBLE MATCH (≥50%) / LOW SIMILARITY (<50%)
-- **Frame extraction**: every 5 seconds for videos
+1. **Asset Registration:** Organizations register original content via the Dataset Manager.
+2. **Feature Extraction:** FrameLens extracts CLIP embeddings and pHash fingerprints, storing them securely in Firebase Firestore.
+3. **Infringement Scan:** Users upload suspected infringing content (images or videos).
+4. **Unified Comparison:** The system compares the uploaded media against the local Firestore dataset and the YouTube API.
+5. **AI Risk Analysis:** Matches are sent to Gemini AI to assess modification types and infringement risk.
+6. **Results Dashboard:** The user is presented with confidence labels, source badges, and a propagation map of the content spread.
 
-## API Endpoints
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/health` | Health check |
-| POST | `/upload/video` | Upload and process video |
-| POST | `/upload/image` | Upload and process image |
-| POST | `/compare/` | Compare against manual dataset |
-| POST | `/compare/auto` | Compare against Firestore dataset |
-| POST | `/compare/unified` | Compare against dataset + YouTube |
-| POST | `/youtube/compare` | Compare against YouTube only |
-| POST | `/results/analyze` | Gemini risk analysis |
-| POST | `/dataset/add` | Add asset to protected dataset |
-| GET | `/dataset/` | Get all protected assets |
-| DELETE | `/dataset/{id}` | Delete protected asset |
-
-## Getting Started
+## 🛠️ Local Development
 
 ### Prerequisites
-- Python 3.12+
+- Python 3.10+
 - Node.js 18+
 - Firebase project with Firestore enabled
 - Google Gemini API key
 - YouTube Data API v3 key
 
-### Backend
-```bash
-cd backend
-pip install -r requirements.txt
-uvicorn main:app --reload
-```
-API docs available at `http://localhost:8000/docs`
+### Backend Setup
 
-### Frontend
-```bash
-cd frontend
-npm install
-npm run dev
-```
-App available at `http://localhost:5173`
+1. Navigate to the backend directory:
+   ```bash
+   cd backend
+   ```
+2. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+3. Set up environment variables in `backend/.env`:
+   ```env
+   GEMINI_API_KEY=your_gemini_api_key
+   FIREBASE_CREDENTIALS=firebase-credentials.json
+   YOUTUBE_API_KEY=your_youtube_api_key
+   ENVIRONMENT=development
+   ```
+4. Start the server:
+   ```bash
+   uvicorn main:app --reload
+   ```
+   *API documentation will be available at `http://localhost:8000/docs`*
 
-## Environment Variables
-Create a `.env` file in the `backend/` folder:
-GEMINI_API_KEY=your_gemini_api_key
-FIREBASE_CREDENTIALS=firebase-credentials.json
-YOUTUBE_API_KEY=your_youtube_api_key
-ENVIRONMENT=development
-PORT=8000
+### Frontend Setup
 
-> ⚠️ Never commit `firebase-credentials.json` or `.env` to version control.
+1. Navigate to the frontend directory:
+   ```bash
+   cd frontend
+   ```
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Set up environment variables in `frontend/.env`:
+   ```env
+   VITE_API_BASE_URL=http://localhost:8000
+   ```
+4. Start the development server:
+   ```bash
+   npm run dev
+   ```
+   *The app will be available at `http://localhost:5173`*
 
-## Pages
-- `/` — Landing page
-- `/login` — Login / Sign Up
-- `/dashboard` — Upload & scan content
-- `/results` — Detection results + propagation graph
-- `/dataset` — Dataset manager (register protected assets)
-
-## Key Features
-- **Two-stage AI detection**: pHash for speed + CLIP for accuracy
-- **Cross-platform scanning**: local dataset + YouTube in one scan
-- **Propagation graph**: visual map of content spread
-- **Gemini risk analysis**: automated infringement assessment
-- **Confidence scoring**: HIGH CONFIDENCE / POSSIBLE MATCH / LOW SIMILARITY
-- **Source badges**: clearly shows where each match was found
+> ⚠️ **Security Note:** Never commit `firebase-credentials.json` or `.env` files to version control.
